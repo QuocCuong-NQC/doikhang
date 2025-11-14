@@ -1,0 +1,960 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>GIẢI IPES MỞ RỘNG NĂM 2025 — Bảng chấm điểm (Realtime V4.0 - Final)</title>
+<style>
+:root{
+  --bg:#050405; --panel:#0f1113; --accent:#ffcc00;
+  --red1:#c82323; --red2:#7a0d0d; --blue1:#0b66ff; --blue2:#002a8a;
+  --muted:rgba(255,255,255,0.06);
+  --judge-light-off:#111; --judge-light-on:#ffea3b;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter, "Segoe UI", Tahoma, Arial, sans-serif;background:linear-gradient(180deg,#030303,#0b0b0b);color:#fff;}
+/* TOP DISPLAY - fills viewport */
+#displaySection{height:100vh;padding:18px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.display-wrap{width:98%;max-width:1500px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));padding:20px;border-radius:14px;box-shadow:0 20px 80px rgba(0,0,0,.7);display:flex;gap:18px;align-items:stretch;position:relative;}
+/* SỬA LỖI MÀU ĐỎ: Đảm bảo left luôn là red-panel */
+.left {flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; position:relative;}
+.right {flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; position:relative;}
+.center {width:520px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;}
+/* UPDATED: bigger title and subtitle */
+.title-top{font-size:48px; font-weight:900; color:var(--accent); text-transform:uppercase; letter-spacing:3px; text-align:center; margin-top:-18px;}
+.match-event{font-size:20px; color: rgba(255,255,255,0.95); font-weight:900; margin-top:8px; text-align:center;}
+.round-label{font-size:36px;color:#bdf6ff;font-weight:900;margin-top:8px;}
+.clock{background:linear-gradient(90deg,#fff6c0,#fff0a0);color:#000;padding:12px 22px;border-radius:16px;font-size:48px;font-weight:900;box-shadow:0 10px 30px rgba(255,204,0,0.12);min-width:220px;text-align:center;}
+.fighter-card{width:100%;border-radius:12px;padding:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.red-panel{background:linear-gradient(180deg,var(--red1),var(--red2));}
+.blue-panel{background:linear-gradient(180deg,var(--blue1),var(--blue2));}
+.fighter-name{font-weight:900;font-size:20px;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,0.06);text-transform:uppercase;}
+.score-big{font-size:110px;font-weight:900;text-shadow:0 8px 26px rgba(0,0,0,.6);}
+
+/* judge lights row under each fighter */
+.judge-lights{display:flex;gap:12px;margin-top:12px;justify-content:center;}
+.judge-light{width:84px;height:72px;border-radius:10px;background:var(--judge-light-off);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#ddd;font-weight:900;transition:all .12s ease;position:relative;overflow:hidden;}
+.judge-light .badge{font-size:16px;z-index:1}
+.judge-light .sub{font-size:14px;opacity:.95;margin-top:4px;z-index:1}
+.judge-light.on{background:var(--judge-light-on);color:#000;box-shadow:0 10px 40px rgba(255,230,60,.28);transform:translateY(-4px) scale(1.02);}
+
+/* large +1/+2 overlay when light is on */
+.judge-light .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:28px;z-index:2;pointer-events:none;opacity:0;transition:opacity .08s linear;}
+.judge-light.showPoints .overlay{opacity:1;color:#000}
+
+/* white flash overlay for winner */
+.winner-flash{ position:absolute; inset:0; background:rgba(255,255,255,0.95); mix-blend-mode:screen; pointer-events:none; opacity:0; transition:opacity .08s linear; border-radius:12px; }
+
+ /* CONTROL SECTION */
+section.section{padding:22px 6%;max-width:1400px;margin:0 auto 36px;}
+#controlSection{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));border-radius:12px;box-shadow:0 12px 50px rgba(0,0,0,0.6);padding:20px;}
+.controls-top{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:space-between;}
+.controls-left{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+label.small{color:var(--accent);font-weight:800;margin-right:6px;}
+input[type="text"],input[type="number"]{padding:10px 12px;border-radius:8px;border:none;background:rgba(255,255,255,0.04);color:#fff;font-weight:800;}
+.controls-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:12px;}
+.btn{padding:12px 18px;border-radius:10px;border:none;font-weight:900;cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,0.45);}
+.btn-primary{background:var(--accent);color:#000;}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:#fff;}
+.btn-danger{background:#ff6b6b;color:#000;}
+.btn-blue{background:#63a0ff;color:#000;}
+.btn-large{padding:16px 22px;border-radius:12px;font-size:18px;}
+
+/* new round selection buttons */
+.select-rounds{display:flex;gap:8px;align-items:center;}
+.round-select-btn{padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);color:#fff;cursor:pointer;font-weight:800;}
+.round-select-btn.active{background:var(--accent);color:#000;border-color:var(--accent);}
+
+/* REST timer small UI */
+.small-note{color:rgba(255,255,255,0.7);font-size:13px;}
+
+/* JUDGES SECTION (big single-card per device) */
+.judges{display:flex;flex-direction:column;gap:18px;margin-top:18px;}
+.judge-card{display:flex;flex-direction:column;gap:12px;padding:18px;border-radius:12px;background:linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));align-items:stretch;}
+.judge-header{text-align:center;font-weight:900;font-size:34px;color:var(--accent);}
+.judge-body{display:flex;gap:12px;align-items:center;justify-content:space-between;}
+.judge-column{flex:1;display:flex;flex-direction:column;gap:12px;align-items:center;}
+.vote-btn{padding:22px 28px;border-radius:12px;font-weight:900;min-width:160px;cursor:pointer;font-size:20px;}
+.v-red{background:linear-gradient(90deg,#ff8a8a,#ff4a4a);color:#000;}
+.v-blue{background:linear-gradient(90deg,#9ecbff,#4a88ff);color:#000;}
+
+/* responsive: each judge should fit phone */
+@media (max-width:900px){
+  .display-wrap{flex-direction:column;align-items:stretch;padding:16px;}
+  .center{order:-1;width:100%;}
+  .score-big{font-size:84px;}
+  .title-top{font-size:28px;}
+  .judge-header{font-size:26px;}
+  .vote-btn{min-width:140px;padding:18px 22px;font-size:18px;}
+}
+.footer-note{text-align:center;color:rgba(255,255,255,0.6);padding:18px;font-size:13px;}
+/* simple blink animation for win (not used; kept) */
+@keyframes strongBlink{0%{box-shadow:0 0 8px 8px rgba(255,255,255,0.25)}50%{box-shadow:0 0 40px 20px rgba(255,255,255,0.05)}100%{box-shadow:none}}
+.blink-win{animation:strongBlink 0.6s ease-in-out 8;}
+</style>
+</head>
+<body>
+
+<section id="displaySection" aria-label="Màn hình trình chiếu">
+  <div class="display-wrap" id="display">
+    <div class="left fighter-card red-panel" id="leftCard">
+      <div class="fighter-name" id="displayRedName">VĐV ĐỎ</div>
+      <div class="score-big" id="displayRedScore">0</div>
+      <div class="judge-lights" id="displayRedLights"></div>
+          <div class="winner-flash" id="leftFlash" style="opacity:0;"></div>
+    </div>
+
+    <div class="center">
+      <div class="title-top" id="eventTitle">GIẢI IPES MỞ RỘNG NĂM 2025</div>
+      <div class="match-event" id="displayEventSub">Nội dung thi đấu: Đối kháng biểu diễn (chỉnh được)</div>
+
+          <div class="round-label" id="displayRound">Hiệp 1</div>
+
+      <div class="clock" id="displayClock">01:30</div>
+    </div>
+
+    <div class="right fighter-card blue-panel" id="rightCard">
+      <div class="fighter-name" id="displayBlueName">VĐV XANH</div>
+      <div class="score-big" id="displayBlueScore">0</div>
+      <div class="judge-lights" id="displayBlueLights"></div>
+          <div class="winner-flash" id="rightFlash" style="opacity:0;"></div>
+    </div>
+  </div>
+</section>
+
+<section id="controlSection" class="section" aria-label="Bảng điều khiển">
+  <div class="controls-top">
+    <div class="controls-left">
+      <label class="small">Tên Giải:</label>
+      <input id="tournamentName" type="text" value="GIẢI IPES MỞ RỘNG NĂM 2025" />
+      <label class="small">VĐV ĐỎ:</label>
+      <input id="redName" type="text" value="Quốc Cường" />
+      <label class="small">VĐV XANH:</label>
+      <input id="blueName" type="text" value="Hưng Thịnh" />
+    </div>
+
+    <div style="display:flex;gap:10px;align-items:center;">
+            <label class="small">Hiệp số:</label>
+      <input id="inputRound" type="number" value="1" min="1" style="width:80px"/>
+    </div>
+  </div>
+
+  <div class="controls-row" style="margin-top:14px;">
+    <button class="btn btn-primary btn-large" id="btnStart">Bắt đầu</button>
+    <button class="btn btn-ghost btn-large" id="btnPause">Dừng</button>
+    <button class="btn btn-ghost btn-large" id="btnResume">Tiếp tục</button>
+        <button class="btn btn-danger btn-large" id="btnReset">Reset</button>
+
+    <div style="flex:1"></div>
+
+    <button class="btn btn-ghost btn-large" id="btnFullscreenControl">Full màn hình</button>
+    <button class="btn btn-ghost btn-large" id="btnWinRed">Đỏ thắng</button>
+    <button class="btn btn-ghost btn-large" id="btnWinBlue">Xanh thắng</button>
+  </div>
+
+    <div style="margin-top:12px; display:flex; align-items:center; gap:12px;">
+    <label class="small">Chọn:</label>
+    <div class="select-rounds" id="roundSelects">
+      <button class="round-select-btn active" id="selRound1">Hiệp 1</button>
+      <button class="round-select-btn" id="selRound2">Hiệp 2</button>
+      <button class="round-select-btn" id="selRound3">Hiệp 3</button>
+      <button class="round-select-btn" id="selRest">Giải lao</button>
+    </div>
+
+    <div style="flex:1"></div>
+    <div class="small-note">Âm thanh báo: ON/OFF <input type="checkbox" id="soundToggle" checked></div>
+  </div>
+
+    <div style="margin-top:12px; display:flex; gap:12px; align-items:center;">
+    <label class="small">Nội dung thi đấu:</label>
+    <input id="eventSubInput" type="text" value="Đối kháng biểu diễn" style="flex:1; padding:10px; border-radius:8px; background:rgba(255,255,255,0.04); border:none; color:#fff; font-weight:800;">
+    </div>
+
+  <div style="margin-top:12px;display:flex;gap:12px;align-items:center;">
+    <button class="btn btn-ghost" onclick="manualScore('red',1)">+1 Đỏ (TT)</button>
+    <button class="btn btn-ghost" onclick="manualScore('red',-1)">-1 Đỏ (TT)</button>
+    <button class="btn btn-ghost" onclick="manualScore('blue',1)">+1 Xanh (TT)</button>
+    <button class="btn btn-ghost" onclick="manualScore('blue',-1)">-1 Xanh (TT)</button>
+
+    <div style="flex:1"></div>
+  </div>
+</section>
+
+<section class="section" id="judgesSection" aria-label="Giám định">
+  <div class="judges">
+
+    <div class="judge-card" id="judge1">
+      <div class="judge-header">GĐ1</div>
+      <div class="judge-body">
+        <div class="judge-column" style="align-items:flex-end;">
+          <div style="font-weight:900;margin-bottom:6px;color:#fff">ĐỎ</div>
+          <button class="vote-btn v-red" onclick="judgeVote(1,'red',1)">+1</button>
+          <button class="vote-btn v-red" onclick="judgeVote(1,'red',2)">+2</button>
+        </div>
+        <div style="width:2px;background:rgba(255,255,255,0.03);height:100%;"></div>
+        <div class="judge-column" style="align-items:flex-start;">
+          <div style="font-weight:900;margin-bottom:6px;color:#fff">XANH</div>
+          <button class="vote-btn v-blue" onclick="judgeVote(1,'blue',1)">+1</button>
+          <button class="vote-btn v-blue" onclick="judgeVote(1,'blue',2)">+2</button>
+        </div>
+      </div>
+          </div>
+
+    <div class="judge-card" id="judge2">
+      <div class="judge-header">GĐ2</div>
+      <div class="judge-body">
+        <div class="judge-column" style="align-items:flex-end;">
+          <div style="font-weight:900;margin-bottom:6px;color:#fff">ĐỎ</div>
+          <button class="vote-btn v-red" onclick="judgeVote(2,'red',1)">+1</button>
+          <button class="vote-btn v-red" onclick="judgeVote(2,'red',2)">+2</button>
+        </div>
+        <div style="width:2px;background:rgba(255,255,255,0.03);height:100%;"></div>
+        <div class="judge-column" style="align-items:flex-start;">
+          <div style="font-weight:900;margin-bottom:6px;color:#fff">XANH</div>
+          <button class="vote-btn v-blue" onclick="judgeVote(2,'blue',1)">+1</button>
+          <button class="vote-btn v-blue" onclick="judgeVote(2,'blue',2)">+2</button>
+        </div>
+        
+      </div>
+    </div>
+
+    <div class="judge-card" id="judge3">
+      <div class="judge-header">GĐ3</div>
+      <div class="judge-body">
+        <div class="judge-column" style="align-items:flex-end;">
+          <div style="font-weight:900;margin-bottom:6px;color:#fff">ĐỎ</div>
+          <button class="vote-btn v-red" onclick="judgeVote(3,'red',1)">+1</button>
+          <button class="vote-btn v-red" onclick="judgeVote(3,'red',2)">+2</button>
+        </div>
+        <div style="width:2px;background:rgba(255,255,255,0.03);height:100%;"></div>
+        <div class="judge-column" style="align-items:flex-start;">
+          <div style="font-weight:900;margin-bottom:6px;color:#fff">XANH</div>
+          <button class="vote-btn v-blue" onclick="judgeVote(3,'blue',1)">+1</button>
+          <button class="vote-btn v-blue" onclick="judgeVote(3,'blue',2)">+2</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<footer class="footer-note">Phiên bản v4.0 — Realtime Firebase. Upload lên GitHub Pages / Netlify để dùng nhiều thiết bị.</footer>
+
+<script>
+/* CÁC GIÁ TRỊ THỜI GIAN CỐ ĐỊNH */
+const DEFAULT_ROUND_TIME = 90; // 1 phút 30 giây
+const DEFAULT_REST_TIME = 30; // 30 giây (the user wanted 30 originally; adjust if needed)
+
+/* STATE */
+let state = {
+  redScore:0, blueScore:0, round:1,
+  timePerRound:DEFAULT_ROUND_TIME, timeLeft:DEFAULT_ROUND_TIME, timerRunning:false, lastUpdate:Date.now(),
+  restTime:DEFAULT_REST_TIME, restLeft:DEFAULT_REST_TIME, restRunning:false,
+  votes:[], 
+  processedAwardKeys:new Set(), 
+  judgeLightTimeouts:{},
+  roundLabel:'round1',
+  roundLabelText:'Hiệp 1',
+  redName:'',
+  blueName:'',
+  eventTitle:'',
+  eventSub:''
+};
+
+/* DOM */
+const displayRedScore = document.getElementById('displayRedScore');
+const displayBlueScore = document.getElementById('displayBlueScore');
+const displayRedName = document.getElementById('displayRedName');
+const displayBlueName = document.getElementById('displayBlueName');
+const displayRound = document.getElementById('displayRound');
+const displayClock = document.getElementById('displayClock');
+const tournamentNameInput = document.getElementById('tournamentName');
+const redNameInput = document.getElementById('redName');
+const blueNameInput = document.getElementById('blueName');
+const inputRound = document.getElementById('inputRound');
+const soundToggle = document.getElementById('soundToggle');
+const eventTitle = document.getElementById('eventTitle');
+const eventSubDisplay = document.getElementById('displayEventSub');
+const eventSubInput = document.getElementById('eventSubInput');
+
+/* selected round mode: 'round1','round2','round3','rest' (default round1) */
+let selectedMode = 'round1';
+
+/* UTILS */
+function formatTime(sec){ const m = Math.floor(sec/60).toString().padStart(2,'0'); const s = (sec%60).toString().padStart(2,'0'); return `${m}:${s}`; }
+
+function updateDisplay(){
+  displayRedScore.innerText = state.redScore;
+  displayBlueScore.innerText = state.blueScore;
+
+  // round label: prefer roundLabelText from DB/state if present
+  if(state.roundLabelText) displayRound.innerText = state.roundLabelText;
+  else {
+    if(selectedMode === 'rest') displayRound.innerText = 'Giải lao';
+    else {
+      const rnum = parseInt(inputRound.value) || state.round || 1;
+      if(selectedMode === 'round1') displayRound.innerText = 'Hiệp ' + rnum;
+      else if(selectedMode === 'round2') displayRound.innerText = 'Hiệp ' + (rnum>=2? rnum : 2);
+      else if(selectedMode === 'round3') displayRound.innerText = 'Hiệp ' + (rnum>=3? rnum : 3);
+    }
+  }
+
+  // compute shown time: if remote timer running, compute remaining using lastUpdate
+  displayClock.innerText = formatTime(state.restRunning ? state.restLeft : state.timeLeft);
+  displayRedName.innerText = state.redName || redNameInput.value || 'VĐV ĐỎ';
+  displayBlueName.innerText = state.blueName || blueNameInput.value || 'VĐV XANH';
+  eventTitle.innerText = state.eventTitle || tournamentNameInput.value || 'GIẢI IPES MỞ RỘNG NĂM 2025';
+  eventSubDisplay.innerText = state.eventSub || eventSubInput.value || '';
+  document.title = `${displayRedName.innerText} ${state.redScore}-${state.blueScore} ${displayBlueName.innerText}`;
+}
+
+/* judge lights creation */
+function createJudgeLights(){
+  const redLights = document.getElementById('displayRedLights');
+  const blueLights = document.getElementById('displayBlueLights');
+  redLights.innerHTML = ''; blueLights.innerHTML = '';
+  for(let j=1;j<=3;j++){
+    const d1 = document.createElement('div'); d1.className='judge-light'; d1.id=`light-red-${j}`;
+    d1.innerHTML = `<div class="badge">GĐ${j}</div><div class="sub">+?</div><div class="overlay"></div>`;
+    redLights.appendChild(d1);
+    const d2 = document.createElement('div'); d2.className='judge-light'; d2.id=`light-blue-${j}`;
+    d2.innerHTML = `<div class="badge">GĐ${j}</div><div class="sub">+?</div><div class="overlay"></div>`;
+    blueLights.appendChild(d2);
+  }
+}
+
+/* overlay show points for judge light: hide badge/sub and show +X big */
+function showJudgeOverlay(judge, side, points, dur=1500){
+  const el = document.getElementById(`light-${side}-${judge}`);
+  if(!el) return;
+  const overlay = el.querySelector('.overlay');
+  overlay.innerText = '+' + points;
+  el.classList.add('on','showPoints');
+  const badge = el.querySelector('.badge');
+  const sub = el.querySelector('.sub');
+  badge.style.visibility='hidden'; sub.style.visibility='hidden';
+  if(state.judgeLightTimeouts[`${judge}-${side}`]) clearTimeout(state.judgeLightTimeouts[`${judge}-${side}`]);
+  state.judgeLightTimeouts[`${judge}-${side}`] = setTimeout(()=>{ if(el){ el.classList.remove('showPoints'); overlay.innerText=''; badge.style.visibility='visible'; sub.style.visibility='visible'; el.classList.remove('on'); } delete state.judgeLightTimeouts[`${judge}-${side}`]; }, dur);
+}
+
+/* quick flash for +point (short) */
+function quickPointFlash(side){
+  const flash = side==='red' ? document.getElementById('leftFlash') : document.getElementById('rightFlash');
+  if(!flash) return;
+  flash.style.opacity = '0.9';
+  setTimeout(()=>{ flash.style.opacity = '0'; }, 900); // ~1s flash
+}
+
+/* flash message */
+function flashMessage(txt){
+  const el = document.createElement('div'); el.style.position='fixed'; el.style.left='50%'; el.style.top='18px'; el.style.transform='translateX(-50%)'; el.style.background='linear-gradient(90deg,#121216,#0b0b0b)'; el.style.padding='10px 14px'; el.style.borderRadius='10px'; el.style.boxShadow='0 12px 40px rgba(0,0,0,0.6)'; el.style.zIndex=9999; el.style.color='#fff'; el.style.opacity='0'; el.style.transition='opacity .16s ease'; el.innerText = txt; document.body.appendChild(el); requestAnimationFrame(()=>el.style.opacity=1); setTimeout(()=>{ el.style.opacity=0; setTimeout(()=>el.remove(),300); },1600);
+}
+
+/* BEEP SOUNDS via WebAudio (no external files) */
+function playTone(freq, duration=0.14, when=0, ctx=null){
+  if(!soundToggle.checked) return;
+  try{
+    const C = ctx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = C.createOscillator();
+    const g = C.createGain();
+    o.type = 'sine';
+    o.frequency.value = freq;
+    g.gain.value = 0.0001;
+    o.connect(g); g.connect(C.destination);
+    const t = C.currentTime + when;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.18, t+0.02);
+    g.gain.linearRampToValueAtTime(0.0001, t+duration);
+    o.start(t);
+    o.stop(t+duration+0.02);
+  }catch(e){ console.warn('tone err', e); }
+}
+function playStartBeep(){ playTone(880, 0.12); } // single short
+function playEnd3Beeps(){
+  // three beeps: 0ms, +180ms, +360ms (sử dụng khi hết hiệp)
+  playTone(660, 0.12, 0);
+  setTimeout(()=>playTone(660,0.12,0),180);
+  setTimeout(()=>playTone(660,0.12,0),360);
+}
+// Âm thanh "keng keng" khi hết giờ/trận/giải lao
+function playEndGameBeep(){
+  playTone(980, 0.2, 0);
+  setTimeout(()=>playTone(980,0.2,0), 300);
+}
+function playWinBeep(){ playTone(1200,0.12); } // optional single flourish for winner
+
+/* WIN flash: blink whole card for 5s (0.5s on/off) + sound */
+function winnerFlash(side){
+  const isRed = (side==='red');
+  const flash = isRed ? document.getElementById('leftFlash') : document.getElementById('rightFlash');
+  const card = isRed ? document.getElementById('leftCard') : document.getElementById('rightCard');
+  if(!flash || !card) return;
+  card.style.position = card.style.position || 'relative';
+  let visible = false;
+  // play small win beep once at start
+  playWinBeep();
+  const interval = setInterval(()=> {
+    visible = !visible;
+    flash.style.opacity = visible ? '0.98' : '0';
+  }, 500); // 0.5s toggle
+  // stop after 5 seconds
+  setTimeout(()=>{
+    clearInterval(interval);
+    flash.style.opacity = '0';
+  }, 5000);
+}
+
+/* ADMIN manual score */
+function manualScore(side, delta){
+  if(window._manualScore) return window._manualScore(side, delta);
+  if(side==='red') state.redScore = Math.max(-999, state.redScore + delta);
+  else state.blueScore = Math.max(-999, state.blueScore + delta);
+  // write to DB if available (keeps in sync)
+  if(window.setMatchKey) window.setMatchKey(side+'Score', side==='red' ? state.redScore : state.blueScore);
+  updateDisplay();
+  flashMessage((delta>0?'+':'')+delta+' '+(side==='red'?'ĐỎ':'XANH')+' (TT)');
+}
+
+/* judgeVote: push vote to Firebase (only), show small local light for 1s */
+function judgeVote(judge, side, points){
+  if(window.pushVote){
+    window.pushVote({
+      judge: judge,
+      side: side,
+      points: points,
+      timestamp: Date.now()
+    }).catch(err => console.error('pushVote err', err));
+    // show small immediate feedback light (no big flash, just indicate button hit)
+    const el = document.getElementById(`light-${side}-${judge}`);
+    if(el){ 
+      // show overlay briefly using existing UI
+      const overlay = el.querySelector('.overlay');
+      overlay.innerText = '+' + points;
+      el.classList.add('on','showPoints');
+      const badge = el.querySelector('.badge'), sub = el.querySelector('.sub');
+      badge.style.visibility='hidden'; sub.style.visibility='hidden';
+      setTimeout(()=>{ if(el){ el.classList.remove('showPoints'); overlay.innerText=''; badge.style.visibility='visible'; sub.style.visibility='visible'; el.classList.remove('on'); } }, 900);
+    }
+  } else {
+    flashMessage("Lỗi: Không kết nối DB (Firebase).");
+  }
+}
+
+/* full screen control button */
+document.getElementById('btnFullscreenControl').addEventListener('click', ()=>{
+  const el = document.getElementById('displaySection');
+  if(!document.fullscreenElement) el.requestFullscreen && el.requestFullscreen();
+  else document.exitFullscreen && document.exitFullscreen();
+});
+
+/* win buttons -> triggers winnerFlash and writes to DB if available */
+document.getElementById('btnWinRed').addEventListener('click', async ()=>{
+  winnerFlash('red');
+  if(window.setMatchKey) await window.setMatchKey('lastWinner','red');
+});
+document.getElementById('btnWinBlue').addEventListener('click', async ()=>{
+  winnerFlash('blue');
+  if(window.setMatchKey) await window.setMatchKey('lastWinner','blue');
+});
+
+/* wire name inputs -> write to DB when changed (sync) */
+redNameInput.addEventListener('input', ()=> {
+  const v = redNameInput.value || '';
+  if(window.setMatchKey) window.setMatchKey('redName', v);
+  state.redName = v;
+  updateDisplay();
+});
+blueNameInput.addEventListener('input', ()=> {
+  const v = blueNameInput.value || '';
+  if(window.setMatchKey) window.setMatchKey('blueName', v);
+  state.blueName = v;
+  updateDisplay();
+});
+
+/* event sub input -> write to DB when changed */
+eventSubInput.addEventListener('input', ()=> {
+  const v = eventSubInput.value || '';
+  if(window.setMatchKey) window.setMatchKey('eventSub', v);
+  state.eventSub = v;
+  updateDisplay();
+});
+
+/* tournament name sync */
+tournamentNameInput.addEventListener('input', ()=> {
+  const v = tournamentNameInput.value || '';
+  if(window.setMatchKey) window.setMatchKey('eventTitle', v);
+  state.eventTitle = v;
+  updateDisplay();
+});
+
+/* init UI */
+createJudgeLights();
+updateDisplay();
+
+/* Round selection UI wiring (keeps display same layout). Set roundLabel in DB to sync to other devices */
+function setSelectedModeLocal(mode){
+  selectedMode = mode;
+  document.querySelectorAll('.round-select-btn').forEach(b=>b.classList.remove('active'));
+  if(mode === 'round1') document.getElementById('selRound1').classList.add('active');
+  if(mode === 'round2') document.getElementById('selRound2').classList.add('active');
+  if(mode === 'round3') document.getElementById('selRound3').classList.add('active');
+  if(mode === 'rest') document.getElementById('selRest').classList.add('active');
+  updateDisplay();
+}
+document.getElementById('selRound1').addEventListener('click', ()=> setRound('Hiệp 1', 'round1', 1));
+document.getElementById('selRound2').addEventListener('click', ()=> setRound('Hiệp 2', 'round2', 2));
+document.getElementById('selRound3').addEventListener('click', ()=> setRound('Hiệp 3', 'round3', 3));
+document.getElementById('selRest').addEventListener('click', ()=> setRound('Giải lao', 'rest', parseInt(inputRound.value) || 1));
+
+/* Bind admin control buttons - existing functions may be provided by Firebase module; we keep compatibility */
+(function bindControlButtons(){
+  const el = id => document.getElementById(id);
+  if(el('btnStart')) el('btnStart').addEventListener('click', ()=> { if(window.startTimer) window.startTimer(); else { startTimerLocal(); } });
+  if(el('btnPause')) el('btnPause').addEventListener('click', ()=> { if(window.pauseTimer) window.pauseTimer(); else { pauseTimerLocal(); } });
+  if(el('btnResume')) el('btnResume').addEventListener('click', ()=> { if(window.resumeTimer) window.resumeTimer(); else { resumeTimerLocal(); } });
+  if(el('btnReset')) el('btnReset').addEventListener('click', ()=> {
+    if(!confirm('Xác nhận reset toàn bộ điểm, hiệp và xóa lịch sử chấm điểm?')) return;
+    if(window.resetAll) window.resetAll();
+    else { resetLocal(); }
+  });
+})();
+
+/* -------------------- Local fallback timer logic (if Firebase not present) -------------------- */
+let _localTimerInterval = null;
+function startTimerLocal(){
+  if(selectedMode === 'rest'){
+    state.restLeft = DEFAULT_REST_TIME;
+    state.restRunning = true;
+    state.timerRunning = false;
+    if(window.setMatchKey) window.setMatchKey('restLeft', state.restLeft);
+    if(window.setMatchKey) window.setMatchKey('restRunning', true);
+    if(window.setMatchKey) window.setMatchKey('roundLabel', 'rest');
+    if(window.setMatchKey) window.setMatchKey('roundLabelText', 'Giải lao');
+  } else {
+    state.timePerRound = DEFAULT_ROUND_TIME;
+    state.timeLeft = state.timePerRound;
+    state.timerRunning = true;
+    state.restRunning = false;
+    const r = Math.max(1, parseInt(inputRound.value) || 1);
+    state.round = r;
+    if(window.setMatchKey) window.setMatchKey('round', r);
+    if(window.setMatchKey) window.setMatchKey('timePerRound', state.timePerRound);
+    if(window.setMatchKey) window.setMatchKey('timeLeft', state.timeLeft);
+    if(window.setMatchKey) window.setMatchKey('timerRunning', true);
+    if(window.setMatchKey) window.setMatchKey('roundLabel', selectedMode || 'round1');
+    if(window.setMatchKey) window.setMatchKey('roundLabelText', selectedMode === 'round1' ? `Hiệp ${r}` : (selectedMode === 'round2' ? `Hiệp ${r}` : `Hiệp ${r}`));
+  }
+  if(window.setMatchKey) window.setMatchKey('lastUpdate', Date.now());
+  updateDisplay();
+  playStartBeep();
+  if(_localTimerInterval) clearInterval(_localTimerInterval);
+  _localTimerInterval = setInterval(()=>{
+    if(state.timerRunning){
+      state.timeLeft = Math.max(0, state.timeLeft - 1);
+      if(window.setMatchKey) window.setMatchKey('timeLeft', state.timeLeft);
+      if(state.timeLeft === 0){
+        playEndGameBeep();
+        state.timerRunning = false;
+        if(window.setMatchKey) { window.setMatchKey('timerRunning', false); window.setMatchKey('timeLeft', 0); }
+      } else if (state.timeLeft <= 3 && state.timeLeft > 0) {
+        // play 3 beeps in last 3 seconds (but don't spam)
+        // (we keep it simple here)
+      }
+    } else if(state.restRunning){
+      state.restLeft = Math.max(0, state.restLeft - 1);
+      if(window.setMatchKey) window.setMatchKey('restLeft', state.restLeft);
+      if(state.restLeft === 0){
+        playEndGameBeep();
+        state.restRunning = false;
+        if(window.setMatchKey) { window.setMatchKey('restRunning', false); window.setMatchKey('restLeft', 0); }
+      } else if (state.restLeft <= 3 && state.restLeft > 0) {
+      }
+    }
+    updateDisplay();
+  }, 1000);
+}
+
+function pauseTimerLocal(){
+  state.timerRunning = false;
+  state.restRunning = false;
+  if(window.setMatchKey){ window.setMatchKey('timerRunning', false); window.setMatchKey('restRunning', false); window.setMatchKey('lastUpdate', Date.now()); }
+  updateDisplay();
+}
+
+function resumeTimerLocal(){
+  if(state.timeLeft > 0 && !state.timerRunning && selectedMode !== 'rest'){
+    state.timerRunning = true;
+    if(window.setMatchKey) window.setMatchKey('timerRunning', true);
+  } else if(state.restLeft > 0 && !state.restRunning && selectedMode === 'rest'){
+    state.restRunning = true;
+    if(window.setMatchKey) window.setMatchKey('restRunning', true);
+  }
+  if(window.setMatchKey) window.setMatchKey('lastUpdate', Date.now());
+  updateDisplay();
+}
+
+function resetLocal(){
+  state.redScore = 0; state.blueScore = 0; state.round = 1;
+  state.timePerRound = DEFAULT_ROUND_TIME; state.timeLeft = DEFAULT_ROUND_TIME; state.timerRunning = false;
+  state.restTime = DEFAULT_REST_TIME; state.restLeft = DEFAULT_REST_TIME; state.restRunning = false;
+  state.votes = [];
+  state.processedAwardKeys = new Set();
+  inputRound.value = 1; // reset input
+  selectedMode = 'round1';
+  setSelectedModeLocal('round1');
+  createJudgeLights();
+  updateDisplay();
+  if(_localTimerInterval) clearInterval(_localTimerInterval);
+  flashMessage("Đã reset cục bộ về 0-0.");
+}
+
+/* -------------------- End local timer fallback -------------------- */
+</script>
+
+<!-- Firebase module -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import { getDatabase, ref, push, set, onChildAdded, onValue, runTransaction, get, remove } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+
+/* ---------- Firebase config (Sếp đã cung cấp) ---------- */
+const firebaseConfig = {
+  apiKey: "AIzaSyArFyjGuW7fBuRYu8jOGw_03OQQXtQjcj8",
+  authDomain: "ipes-2b9db.firebaseapp.com",
+  databaseURL: "https://ipes-2b9db-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "ipes-2b9db",
+  storageBucket: "ipes-2b9db.firebasestorage.app",
+  messagingSenderId: "410102574315",
+  appId: "1:410102574315:web:191862efacd5e14a62e2ae",
+  measurementId: "G-SCKTXEWZ6E"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const matchRef = ref(db, 'match');
+const votesRef = ref(db, 'votes');
+const awardsRef = ref(db, 'awards');
+
+/* helper to update match keys */
+window.setMatchKey = async function(key, val){
+  await set(ref(db, `match/${key}`), val);
+}
+
+/* New helper: setRound(displayLabel, modeKey, roundNumber) -> writes both display label and mode key */
+window.setRound = async function(displayLabel, modeKey, roundNumber){
+  await set(ref(db, 'match/roundLabel'), modeKey);
+  await set(ref(db, 'match/roundLabelText'), displayLabel);
+  if(modeKey !== 'rest') {
+    await set(ref(db, 'match/round'), roundNumber);
+    // Cập nhật input round cho tiện theo dõi
+    document.getElementById('inputRound').value = roundNumber;
+  }
+  // for local immediate feedback
+  state.roundLabel = modeKey;
+  state.roundLabelText = displayLabel;
+  selectedMode = modeKey;
+  setSelectedModeLocal(modeKey);
+}
+
+/* Hàm đẩy phiếu bầu lên DB */
+window.pushVote = async function(voteData){
+  // we keep votes under /votes with push keys; each voteData should include judge, side, points, timestamp
+  await push(votesRef, voteData);
+}
+
+/* Process votes and award logic (safe atomic using deterministic awards path) */
+async function processVotes(votes){
+  const now = Date.now();
+  const timeWindow = 2000; // 2s window
+  // latest votes within window
+  const recent = votes.filter(v => now - (v.timestamp || 0) <= timeWindow);
+  if(recent.length < 2) return;
+
+  // keep only latest per judge (dedupe by judge taking latest timestamp)
+  const latestByJudge = {};
+  recent.slice().sort((a,b)=>a.timestamp - b.timestamp).forEach(v=>{
+    latestByJudge[v.judge] = v;
+  });
+  const finalVotes = Object.values(latestByJudge);
+
+  // count sides
+  const redVotes = finalVotes.filter(v=>v.side==='red');
+  const blueVotes = finalVotes.filter(v=>v.side==='blue');
+
+  let winningSide = null;
+  if(redVotes.length >= 2 && redVotes.length > blueVotes.length) winningSide = 'red';
+  else if(blueVotes.length >= 2 && blueVotes.length > redVotes.length) winningSide = 'blue';
+  if(!winningSide) return;
+
+  // determine awardedPoints by majority among that side
+  const votesForWin = finalVotes.filter(v=>v.side===winningSide);
+  const c1 = votesForWin.filter(v=>v.points===1).length;
+  const c2 = votesForWin.filter(v=>v.points===2).length;
+  let awardedPoints = 0;
+  if(c2 > c1) awardedPoints = 2;
+  else if(c1 >= c2 && c1>0) awardedPoints = 1;
+  else awardedPoints = c2>0?2:0;
+  if(awardedPoints === 0) return;
+
+  // Create deterministic award key based on winningSide + time block (floor to window)
+  const timeBlockKey = Math.floor(now / timeWindow) * timeWindow;
+  const uniqueAwardKey = `${winningSide}-${timeBlockKey}`;
+
+  // Use runTransaction on deterministic path to ensure only one client succeeds
+  const awardRef = ref(db, `awards/${uniqueAwardKey}`);
+  try {
+    const txResult = await runTransaction(awardRef, (current)=>{
+      if(current === null){
+        return {
+          side: winningSide,
+          points: awardedPoints,
+          timestamp: now,
+          judges: votesForWin.map(v=>v.judge),
+          key: uniqueAwardKey
+        };
+      } else return; // already exists
+    });
+    if(txResult.committed && txResult.snapshot && txResult.snapshot.val()){
+      // transaction created the award entry; now increment score atomically
+      const scoreRef = ref(db, `match/${winningSide}Score`);
+      await runTransaction(scoreRef, (cur)=> (cur||0) + awardedPoints);
+      // clear votes node to avoid reprocessing same votes
+      // (safe: small momentary race ok; we remove all votes older than timeWindow)
+      const allVotesSnap = await get(votesRef);
+      if(allVotesSnap.exists()){
+        const allObj = allVotesSnap.val();
+        // remove votes whose timestamp <= now (they are in the window)
+        for(const k of Object.keys(allObj)){
+          const v = allObj[k];
+          if(v.timestamp && (now - v.timestamp) <= timeWindow){
+            await set(ref(db, `votes/${k}`), null);
+          }
+        }
+      }
+    } else {
+      // someone else created it first - nothing to do
+    }
+  } catch(e){
+    console.error('award txn error', e);
+  }
+}
+
+/* Reset function (atomic) */
+window.resetAll = async function(){
+  await set(votesRef, null);
+  await set(awardsRef, null);
+  const redName = document.getElementById('redName').value;
+  const blueName = document.getElementById('blueName').value;
+  const eventTitleVal = document.getElementById('tournamentName').value;
+  const eventSub = document.getElementById('eventSubInput').value;
+
+  await set(matchRef, {
+    redScore: 0,
+    blueScore: 0,
+    round: 1,
+    timerRunning: false,
+    restRunning: false,
+    timeLeft: DEFAULT_ROUND_TIME,
+    restLeft: DEFAULT_REST_TIME,
+    roundLabel: 'round1',
+    roundLabelText: 'Hiệp 1',
+    lastUpdate: Date.now(),
+    redName: redName,
+    blueName: blueName,
+    eventTitle: eventTitleVal,
+    eventSub: eventSub
+  });
+
+  // local reset state
+  state.votes = [];
+  state.processedAwardKeys = new Set();
+  document.getElementById('inputRound').value = 1;
+  selectedMode = 'round1';
+  setSelectedModeLocal('round1');
+  flashMessage("Đã reset toàn bộ trận đấu và điểm số về 0-0.");
+};
+
+/* Listen for votes -> maintain local state array (with keys) and run processVotes */
+onChildAdded(votesRef, (snap) => {
+  const v = snap.val();
+  if(!v) return;
+  // include DB key so we can remove if needed
+  const voteRecord = { ...v, _id: snap.key };
+  state.votes.push(voteRecord);
+  // keep only recent votes (2s)
+  const now = Date.now();
+  state.votes = state.votes.filter(x => now - (x.timestamp||0) <= 2000);
+  // try processing
+  processVotes(state.votes);
+});
+
+/* Listen for awards -> show UI effect and update local scores (scores in match node will also update)
+   Using onChildAdded ensures all clients show the award effect. */
+onChildAdded(awardsRef, (snap)=>{
+  const award = snap.val();
+  if(!award) return;
+  // key uniqueness handled by DB path name
+  // avoid double-handling by client local set
+  if(state.processedAwardKeys.has(award.key)) return;
+  state.processedAwardKeys.add(award.key);
+
+  // update local score (UI)
+  if(award.side === 'red') state.redScore = Math.max(-999, state.redScore + award.points);
+  else state.blueScore = Math.max(-999, state.blueScore + award.points);
+
+  quickPointFlash(award.side);
+  flashMessage(`+${award.points} ${award.side === 'red' ? 'ĐỎ' : 'XANH'} (Đồng thuận)`);
+
+  // show judge overlays for involved judges
+  if(Array.isArray(award.judges)){
+    award.judges.forEach(j => {
+      showJudgeOverlay(j, award.side, award.points, 1400);
+    });
+  }
+
+  updateDisplay();
+});
+
+/* Subscribe to /match and update state variables. This keeps UI in sync on all devices. */
+onValue(matchRef, (snap)=>{
+  const m = snap.val() || {};
+  const now = Date.now();
+
+  // scores
+  state.redScore = m.redScore != null ? m.redScore : state.redScore;
+  state.blueScore = m.blueScore != null ? m.blueScore : state.blueScore;
+
+  // round and labels
+  state.round = m.round || state.round || 1;
+  state.roundLabel = m.roundLabel || state.roundLabel || 'round1';
+  state.roundLabelText = m.roundLabelText || (state.roundLabel === 'rest' ? 'Giải lao' : ('Hiệp ' + state.round));
+
+  // names and event
+  state.redName = m.redName || state.redName || redNameInput.value;
+  state.blueName = m.blueName || state.blueName || blueNameInput.value;
+  state.eventTitle = m.eventTitle || state.eventTitle || tournamentNameInput.value;
+  state.eventSub = m.eventSub || state.eventSub || eventSubInput.value;
+
+  // timer flags & compute timeLeft/restLeft based on lastUpdate to ensure all clients show moving time
+  const lastUpdate = m.lastUpdate || Date.now();
+  const timerRunning = !!m.timerRunning;
+  const restRunning = !!m.restRunning;
+
+  // compute main timeLeft value (server-stored timeLeft is the value at lastUpdate)
+  let storedTimeLeft = (m.timeLeft != null) ? m.timeLeft : DEFAULT_ROUND_TIME;
+  let storedRestLeft = (m.restLeft != null) ? m.restLeft : DEFAULT_REST_TIME;
+
+  if(timerRunning){
+    const elapsed = Math.floor((now - lastUpdate) / 1000);
+    state.timeLeft = Math.max(0, storedTimeLeft - elapsed);
+  } else {
+    state.timeLeft = storedTimeLeft;
+  }
+
+  if(restRunning){
+    const elapsedR = Math.floor((now - lastUpdate) / 1000);
+    state.restLeft = Math.max(0, storedRestLeft - elapsedR);
+  } else {
+    state.restLeft = storedRestLeft;
+  }
+
+  state.timerRunning = timerRunning;
+  state.restRunning = restRunning;
+
+  // local UI updates (e.g., update round buttons highlight)
+  selectedMode = state.roundLabel || selectedMode;
+  setSelectedModeLocal(selectedMode);
+
+  // Sync inputRound if controller set it
+  if(m.round) inputRound.value = m.round;
+
+  updateDisplay();
+});
+
+/* Poller: ensure the clock in UI always updates every 300ms even if DB updates infrequently.
+   This fixes the symptom where the timer runs (in DB) but display doesn't change until another event.
+*/
+setInterval(async ()=>{
+  // fetch latest match snapshot once and recompute time display based on lastUpdate
+  try {
+    const snap = await get(matchRef);
+    const m = snap.val() || {};
+    const now = Date.now();
+    const lastUpdate = m.lastUpdate || now;
+    const timerRunning = !!m.timerRunning;
+    const restRunning = !!m.restRunning;
+    let storedTimeLeft = (m.timeLeft != null) ? m.timeLeft : DEFAULT_ROUND_TIME;
+    let storedRestLeft = (m.restLeft != null) ? m.restLeft : DEFAULT_REST_TIME;
+
+    if(timerRunning){
+      const elapsed = Math.floor((now - lastUpdate) / 1000);
+      state.timeLeft = Math.max(0, storedTimeLeft - elapsed);
+    } else {
+      state.timeLeft = storedTimeLeft;
+    }
+    if(restRunning){
+      const elapsed = Math.floor((now - lastUpdate) / 1000);
+      state.restLeft = Math.max(0, storedRestLeft - elapsed);
+    } else {
+      state.restLeft = storedRestLeft;
+    }
+    updateDisplay();
+  } catch(e){
+    // ignore fetch error - UI still shows last known state
+  }
+}, 300);
+
+/* Helper functions for timer control (using DB setMatchKey to sync state) */
+window.startTimer = async function(){
+  const isRest = selectedMode === 'rest';
+  const timeLeft = isRest ? DEFAULT_REST_TIME : DEFAULT_ROUND_TIME;
+  await setMatchKey('timerRunning', !isRest);
+  await setMatchKey('restRunning', isRest);
+  await setMatchKey(isRest ? 'restLeft' : 'timeLeft', timeLeft);
+  await setMatchKey('lastUpdate', Date.now());
+  if(!isRest) await setMatchKey('round', parseInt(inputRound.value) || 1);
+  // write readable label
+  if(selectedMode === 'rest'){
+    await setMatchKey('roundLabel', 'rest');
+    await setMatchKey('roundLabelText', 'Giải lao');
+  } else {
+    await setMatchKey('roundLabel', selectedMode);
+    await setMatchKey('roundLabelText', `Hiệp ${parseInt(inputRound.value) || state.round}`);
+  }
+  playStartBeep();
+};
+
+window.pauseTimer = async function(){
+  // Compute current timeLeft/restLeft and store them, then stop running flags
+  const snap = await get(matchRef);
+  const m = snap.val() || {};
+  const now = Date.now();
+  let tl = (m.timeLeft != null) ? m.timeLeft : DEFAULT_ROUND_TIME;
+  if(m.timerRunning && m.lastUpdate) {
+    const elapsed = Math.floor((now - m.lastUpdate)/1000);
+    tl = Math.max(0, tl - elapsed);
+  }
+  let rl = (m.restLeft != null) ? m.restLeft : DEFAULT_REST_TIME;
+  if(m.restRunning && m.lastUpdate){
+    const elapsed = Math.floor((now - m.lastUpdate)/1000);
+    rl = Math.max(0, rl - elapsed);
+  }
+  await setMatchKey('timeLeft', tl);
+  await setMatchKey('restLeft', rl);
+  await setMatchKey('timerRunning', false);
+  await setMatchKey('restRunning', false);
+  await setMatchKey('lastUpdate', now);
+};
+
+window.resumeTimer = async function(){
+  const isRest = selectedMode === 'rest';
+  if(isRest){
+    if(state.restLeft > 0) await setMatchKey('restRunning', true);
+  } else {
+    if(state.timeLeft > 0) await setMatchKey('timerRunning', true);
+  }
+  await setMatchKey('lastUpdate', Date.now());
+};
+</script>
+
+</body>
+</html>
